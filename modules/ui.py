@@ -6,7 +6,6 @@ from modules.config import EMOJI, TEXT
 class UI:
     @staticmethod
     def main_menu():
-        """Create main menu keyboard with modern styling"""
         kb = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
         kb.add(
             types.KeyboardButton(f'{EMOJI["question"]} Задать вопрос'),
@@ -20,7 +19,6 @@ class UI:
 
     @staticmethod
     def admin_menu():
-        """Create admin menu keyboard with modern styling"""
         kb = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
         kb.add(
             types.KeyboardButton(f'{EMOJI["add"]} Добавить баллы'),
@@ -37,7 +35,6 @@ class UI:
 
     @staticmethod
     def contact_management_menu():
-        """Create contact management menu"""
         kb = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
         kb.add(
             types.KeyboardButton(f'{EMOJI["add"]} Добавить контакт'),
@@ -51,21 +48,18 @@ class UI:
 
     @staticmethod
     def cancel_button():
-        """Create cancel button keyboard"""
         kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
         kb.add(types.KeyboardButton(f"{EMOJI['cancel']} Отмена"))
         return kb
 
     @staticmethod
     def back_button():
-        """Create back button keyboard"""
         kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
         kb.add(types.KeyboardButton(f"{EMOJI['back']} Назад"))
         return kb
 
     @staticmethod
     def answer_type_buttons(qid: int):
-        """Create answer type inline buttons"""
         kb = types.InlineKeyboardMarkup(row_width=1)
         kb.add(
             types.InlineKeyboardButton(
@@ -81,7 +75,6 @@ class UI:
 
     @staticmethod
     def question_list(questions: List[Tuple]):
-        """Create question list inline keyboard"""
         kb = types.InlineKeyboardMarkup(row_width=1)
         for q in questions:
             text = q[1]
@@ -95,7 +88,6 @@ class UI:
 
     @staticmethod
     def help_button():
-        """Create help button inline keyboard"""
         kb = types.InlineKeyboardMarkup()
         kb.add(types.InlineKeyboardButton(
             f"{EMOJI['sos']} Перейти к помощнику", 
@@ -105,7 +97,6 @@ class UI:
 
     @staticmethod
     def format_welcome_message() -> str:
-        """Format welcome message with modern styling"""
         return f"""
 {TEXT['welcome']}
 
@@ -119,7 +110,6 @@ class UI:
 
     @staticmethod
     def format_admin_welcome() -> str:
-        """Format admin welcome message"""
         return f"""
 {TEXT['admin_welcome']}
 
@@ -134,7 +124,6 @@ class UI:
 
     @staticmethod
     def format_help_message() -> str:
-        """Format help message with modern styling"""
         return f"""
 {TEXT['help_title']}
 
@@ -150,7 +139,6 @@ class UI:
 
     @staticmethod
     def format_class_rating(scores: List[Tuple]) -> str:
-        """Format class rating with modern styling"""
         if not scores:
             return TEXT['empty_rating']
             
@@ -168,7 +156,6 @@ class UI:
 
     @staticmethod
     def format_question(question: Dict[str, Any], with_author: bool = False) -> str:
-        """Format question details with modern styling"""
         text = f"<b>{question['title']}</b>\n\n"
         
         if question['description'] and question['description'] != 'Нет описания':
@@ -185,7 +172,6 @@ class UI:
 
     @staticmethod
     def format_authorized_contacts(contacts: List[str]) -> str:
-        """Format authorized contacts list"""
         if not contacts:
             return f"{EMOJI['empty']} <b>Список авторизованных контактов пуст</b>"
             
