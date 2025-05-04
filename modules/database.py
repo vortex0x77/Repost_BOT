@@ -5,7 +5,6 @@ from typing import List, Tuple, Dict, Any, Optional
 
 from modules.config import DB_PATH, CLASS_DB_PATH
 
-# Database manager for user questions and answers
 class DatabaseManager:
     def __init__(self, path: str):
         self.conn = sqlite3.connect(path, check_same_thread=False)
@@ -75,7 +74,6 @@ class DatabaseManager:
     def close(self):
         self.conn.close()
 
-# Class database manager
 class ClassDatabaseManager:
     def __init__(self, path: str):
         self.path = path
@@ -109,19 +107,16 @@ class ClassDatabaseManager:
             with sqlite3.connect(self.path) as conn:
                 cursor = conn.cursor()
                 
-                # Check if class exists
                 cursor.execute("SELECT total_score FROM class_scores WHERE class_name = ?", (class_name,))
                 result = cursor.fetchone()
                 
                 if result:
-                    # Update existing class
                     new_score = result[0] + score
                     cursor.execute(
                         "UPDATE class_scores SET total_score = ? WHERE class_name = ?",
                         (new_score, class_name)
                     )
                 else:
-                    # Add new class
                     cursor.execute(
                         "INSERT INTO class_scores (class_name, total_score) VALUES (?, ?)",
                         (class_name, score)
@@ -133,7 +128,6 @@ class ClassDatabaseManager:
             print(f"Error adding score: {e}")
             return False
 
-# Initialize database instances
 user_db = None
 class_db = None
 
@@ -142,9 +136,7 @@ def init_databases():
     user_db = DatabaseManager(DB_PATH)
     class_db = ClassDatabaseManager(CLASS_DB_PATH)
 
-# User service functions
 def register_user(user_id: int, username: str):
-    """Register a new user or update existing user"""
     reg_date = datetime.now().strftime('%Y-%m-%d %H:%M')
     user_db.execute(
         'INSERT OR IGNORE INTO users(user_id, username, registration_date) VALUES(?,?,?)', 
@@ -152,13 +144,10 @@ def register_user(user_id: int, username: str):
     )
 
 def get_username(user_id: int) -> Optional[str]:
-    """Get username for a user"""
     result = user_db.fetchone('SELECT username FROM users WHERE user_id = ?', (user_id,))
     return result[0] if result else None
 
-# Question service functions
 def save_question(user_id: int, title: str, description: str) -> int:
-    """Save a new question and return its ID"""
     cursor = user_db.execute(
         'INSERT INTO questions(author_id, title, description, status, created_at) VALUES(?,?,?,?,?)',
         (user_id, title, description, 'open', datetime.now().strftime('%Y-%m-%d %H:%M'))
@@ -167,7 +156,6 @@ def save_question(user_id: int, title: str, description: str) -> int:
     return cursor.lastrowid
 
 def get_open_questions() -> List[Tuple]:
-    """Get all open questions with author information"""
     return user_db.fetchall('''
         SELECT q.id, q.title, COALESCE(u.username, 'Аноним')
         FROM questions q
@@ -177,7 +165,6 @@ def get_open_questions() -> List[Tuple]:
     ''')
 
 def get_question_details(question_id: int) -> Optional[Dict[str, Any]]:
-    """Get detailed information about a question"""
     question_data = user_db.fetchone('''
         SELECT q.id, q.author_id, q.title,
                COALESCE(q.description, 'Нет описания'),
@@ -202,12 +189,9 @@ def get_question_details(question_id: int) -> Optional[Dict[str, Any]]:
     }
 
 def close_question(question_id: int) -> None:
-    """Mark a question as closed"""
     user_db.execute('UPDATE questions SET status = "closed" WHERE id = ?', (question_id,))
 
-# Answer service functions
 def save_online_answer(question_id: int, user_id: int, contact: str) -> None:
-    """Save an online answer"""
     user_db.execute(
         'INSERT INTO answers(question_id, responder_id, answer_type, contact_info, created_at) VALUES(?,?,?,?,?)',
         (question_id, user_id, 'online', contact, datetime.now().strftime('%Y-%m-%d %H:%M'))
@@ -215,30 +199,23 @@ def save_online_answer(question_id: int, user_id: int, contact: str) -> None:
     close_question(question_id)
 
 def save_offline_answer(question_id: int, user_id: int, meeting_time: str) -> None:
-    """Save an offline answer"""
     user_db.execute(
         'INSERT INTO answers(question_id, responder_id, answer_type, meeting_time, created_at) VALUES(?,?,?,?,?)',
         (question_id, user_id, 'offline', meeting_time, datetime.now().strftime('%Y-%m-%d %H:%M'))
     )
     close_question(question_id)
 
-# User state functions
 def save_state(user_id: int, data: str) -> None:
-    """Save user state data"""
     user_db.execute('INSERT OR REPLACE INTO user_states(user_id, temp_data) VALUES(?,?)', (user_id, data))
 
 def get_state(user_id: int) -> Optional[str]:
-    """Get user state data"""
     row = user_db.fetchone('SELECT temp_data FROM user_states WHERE user_id=?', (user_id,))
     return row[0] if row else None
 
 def clear_state(user_id: int) -> None:
-    """Clear user state data"""
     user_db.execute('DELETE FROM user_states WHERE user_id = ?', (user_id,))
 
-# Authorization functions
 def add_authorized_contact(contact: str) -> bool:
-    """Add a contact to the authorized list"""
     try:
         user_db.execute(
             'INSERT INTO authorized_contacts(contact, added_at) VALUES(?,?)',
@@ -246,22 +223,18 @@ def add_authorized_contact(contact: str) -> bool:
         )
         return True
     except sqlite3.IntegrityError:
-        # Contact already exists
         return False
     except Exception:
         return False
 
 def remove_authorized_contact(contact: str) -> bool:
-    """Remove a contact from the authorized list"""
     cursor = user_db.execute('DELETE FROM authorized_contacts WHERE contact = ?', (contact,))
     return cursor.rowcount > 0
 
 def is_contact_authorized(contact: str) -> bool:
-    """Check if a contact is authorized"""
     result = user_db.fetchone('SELECT id FROM authorized_contacts WHERE contact = ?', (contact,))
     return result is not None
 
 def get_authorized_contacts() -> List[str]:
-    """Get all authorized contacts"""
     results = user_db.fetchall('SELECT contact FROM authorized_contacts ORDER BY added_at')
     return [row[0] for row in results]
