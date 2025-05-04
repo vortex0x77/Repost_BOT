@@ -16,7 +16,6 @@ from modules.permissions import (
 from modules.ui import UI
 from modules.config import TEXT, EMOJI
 
-# State constants
 STATE_WAITING_TITLE = "waiting_title"
 STATE_WAITING_DESCRIPTION = "waiting_description"
 STATE_WAITING_POINTS = "waiting_points"
@@ -26,20 +25,16 @@ STATE_WAITING_ADD_CONTACT = "waiting_add_contact"
 STATE_WAITING_REMOVE_CONTACT = "waiting_remove_contact"
 
 def register_all_handlers():
-    """Register all message and callback handlers"""
     register_command_handlers()
     register_message_handlers()
     register_callback_handlers()
 
 def register_command_handlers():
-    """Register command handlers"""
     bot.register_message_handler(cmd_start, commands=['start'], pass_bot=True)
     bot.register_message_handler(cmd_help, commands=['help'], pass_bot=True)
     bot.register_message_handler(cmd_admin, commands=['admin'], pass_bot=True)
 
 def register_message_handlers():
-    """Register message handlers"""
-    # Main menu handlers
     bot.register_message_handler(
         ask_question, 
         func=lambda msg: msg.text and f'{EMOJI["question"]} Задать вопрос' in msg.text,
@@ -61,7 +56,6 @@ def register_message_handlers():
         pass_bot=True
     )
     
-    # Admin menu handlers
     bot.register_message_handler(
         add_points, 
         func=lambda msg: msg.text and f'{EMOJI["add"]} Добавить баллы' in msg.text,
@@ -83,7 +77,6 @@ def register_message_handlers():
         pass_bot=True
     )
     
-    # Contact management menu handlers
     bot.register_message_handler(
         add_authorized_contact, 
         func=lambda msg: msg.text and f'{EMOJI["add"]} Добавить контакт' in msg.text,
@@ -105,14 +98,12 @@ def register_message_handlers():
         pass_bot=True
     )
     
-    # Cancel handler
     bot.register_message_handler(
         cancel_action, 
         func=lambda msg: msg.text and f'{EMOJI["cancel"]} Отмена' in msg.text,
         pass_bot=True
     )
     
-    # State handlers
     bot.register_message_handler(
         process_question_title, 
         func=lambda msg: get_state(msg.from_user.id) == STATE_WAITING_TITLE,
@@ -150,7 +141,6 @@ def register_message_handlers():
     )
 
 def register_callback_handlers():
-    """Register callback query handlers"""
     bot.register_callback_query_handler(
         process_question_selection, 
         func=lambda call: call.data and call.data.startswith('question_'),
@@ -167,19 +157,14 @@ def register_callback_handlers():
         pass_bot=True
     )
 
-# Command handlers
 def cmd_start(message: Message, bot):
-    """Handle /start command"""
     user_id = message.from_user.id
     username = message.from_user.username
     
-    # Register user in database
     register_user(user_id, username)
     
-    # Clear any existing state
     clear_state(user_id)
     
-    # Send welcome message with main menu
     bot.send_message(
         user_id,
         UI.format_welcome_message(),
@@ -188,7 +173,6 @@ def cmd_start(message: Message, bot):
     )
 
 def cmd_help(message: Message, bot):
-    """Handle /help command"""
     bot.send_message(
         message.chat.id,
         UI.format_help_message(),
@@ -197,7 +181,6 @@ def cmd_help(message: Message, bot):
     )
 
 def cmd_admin(message: Message, bot):
-    """Handle /admin command"""
     user_id = message.from_user.id
     
     if is_admin(user_id):
@@ -215,12 +198,9 @@ def cmd_admin(message: Message, bot):
             parse_mode='HTML'
         )
 
-# Main menu handlers
 def ask_question(message: Message, bot):
-    """Handle ask question request"""
     user_id = message.from_user.id
     
-    # Set state to waiting for title
     save_state(user_id, STATE_WAITING_TITLE)
     
     bot.send_message(
@@ -231,7 +211,6 @@ def ask_question(message: Message, bot):
     )
 
 def show_open_questions(message: Message, bot):
-    """Show list of open questions"""
     questions = get_open_questions()
     
     if not questions:
@@ -250,11 +229,9 @@ def show_open_questions(message: Message, bot):
     )
 
 def show_rating(message: Message, bot):
-    """Show class rating"""
     global class_db
     from modules.database import init_databases, class_db
     
-    # Проверяем, инициализирована ли база данных
     if class_db is None:
         try:
             init_databases()
@@ -273,7 +250,6 @@ def show_rating(message: Message, bot):
             )
             return
     
-    # Теперь можно безопасно получить оценки
     scores = class_db.get_scores()
     
     bot.send_message(
@@ -282,13 +258,10 @@ def show_rating(message: Message, bot):
         parse_mode='HTML'
     )
 
-# Admin menu handlers
 def add_points(message: Message, bot):
-    """Handle add points request"""
     user_id = message.from_user.id
     username = message.from_user.username
     
-    # Check if user is admin or authorized
     if not (is_admin(user_id) or is_authorized(username)):
         bot.send_message(
             user_id,
@@ -297,7 +270,6 @@ def add_points(message: Message, bot):
         )
         return
     
-    # Set state to waiting for points
     save_state(user_id, STATE_WAITING_POINTS)
     
     bot.send_message(
@@ -308,10 +280,8 @@ def add_points(message: Message, bot):
     )
 
 def manage_contacts(message: Message, bot):
-    """Handle contact management request"""
     user_id = message.from_user.id
     
-    # Check if user is admin
     if not is_admin(user_id):
         bot.send_message(
             user_id,
@@ -328,10 +298,8 @@ def manage_contacts(message: Message, bot):
     )
 
 def check_db(message: Message, bot):
-    """Check database status"""
     user_id = message.from_user.id
     
-    # Check if user is admin
     if not is_admin(user_id):
         bot.send_message(
             user_id,
@@ -341,7 +309,6 @@ def check_db(message: Message, bot):
         return
     
     try:
-        # Try to execute a simple query to check if DB is working
         user_db.execute("SELECT 1")
         class_db.get_scores()
         
@@ -358,15 +325,11 @@ def check_db(message: Message, bot):
         )
 
 def back_to_main(message: Message, bot):
-    """Return to main menu"""
     cmd_start(message, bot)
 
-# Contact management handlers
 def add_authorized_contact(message: Message, bot):
-    """Handle add authorized contact request"""
     user_id = message.from_user.id
     
-    # Check if user is admin
     if not is_admin(user_id):
         bot.send_message(
             user_id,
@@ -375,7 +338,6 @@ def add_authorized_contact(message: Message, bot):
         )
         return
     
-    # Set state to waiting for contact
     save_state(user_id, STATE_WAITING_ADD_CONTACT)
     
     bot.send_message(
@@ -387,10 +349,8 @@ def add_authorized_contact(message: Message, bot):
     )
 
 def remove_authorized_contact(message: Message, bot):
-    """Handle remove authorized contact request"""
     user_id = message.from_user.id
     
-    # Check if user is admin
     if not is_admin(user_id):
         bot.send_message(
             user_id,
@@ -399,7 +359,6 @@ def remove_authorized_contact(message: Message, bot):
         )
         return
     
-    # Set state to waiting for contact
     save_state(user_id, STATE_WAITING_REMOVE_CONTACT)
     
     bot.send_message(
@@ -411,10 +370,8 @@ def remove_authorized_contact(message: Message, bot):
     )
 
 def list_authorized_contacts(message: Message, bot):
-    """List all authorized contacts"""
     user_id = message.from_user.id
     
-    # Check if user is admin
     if not is_admin(user_id):
         bot.send_message(
             user_id,
@@ -432,12 +389,9 @@ def list_authorized_contacts(message: Message, bot):
     )
 
 def back_to_admin(message: Message, bot):
-    """Return to admin menu"""
     cmd_admin(message, bot)
 
-# State handlers
 def process_question_title(message: Message, bot):
-    """Process question title input"""
     user_id = message.from_user.id
     title = message.text.strip()
     
@@ -449,7 +403,6 @@ def process_question_title(message: Message, bot):
         )
         return
     
-    # Save title to state and ask for description
     save_state(user_id, f"{STATE_WAITING_DESCRIPTION}:{title}")
     
     bot.send_message(
@@ -461,11 +414,9 @@ def process_question_title(message: Message, bot):
     )
 
 def process_question_description(message: Message, bot):
-    """Process question description input"""
     user_id = message.from_user.id
     description = message.text.strip()
     
-    # Get title from state
     state_data = get_state(user_id)
     if not state_data or ':' not in state_data:
         bot.send_message(
@@ -479,14 +430,11 @@ def process_question_description(message: Message, bot):
         
     title = state_data.split(':', 1)[1]
     
-    # Handle empty description or skip symbol
     if not description or description == '-':
         description = "Нет описания"
     
-    # Save question to database
     question_id = save_question(user_id, title, description)
     
-    # Clear state
     clear_state(user_id)
     
     bot.send_message(
@@ -500,12 +448,10 @@ def process_question_description(message: Message, bot):
     )
 
 def process_points(message: Message, bot):
-    """Process points input"""
     user_id = message.from_user.id
     username = message.from_user.username
     text = message.text.strip()
     
-    # Check if user is admin or authorized
     if not (is_admin(user_id) or is_authorized(username)):
         bot.send_message(
             user_id,
@@ -515,7 +461,6 @@ def process_points(message: Message, bot):
         clear_state(user_id)
         return
     
-    # Parse input (format: "Class Points")
     match = re.match(r'^([0-9]+[A-Za-zА-Яа-я]+)\s+([0-9]+)$', text)
     
     if not match:
@@ -529,7 +474,6 @@ def process_points(message: Message, bot):
     class_name = match.group(1)
     points = int(match.group(2))
     
-    # Проверяем, инициализирована ли база данных
     global class_db
     from modules.database import init_databases, class_db
     
@@ -553,10 +497,8 @@ def process_points(message: Message, bot):
             clear_state(user_id)
             return
     
-    # Add points to class
     success = class_db.add_score(class_name, points)
     
-    # Clear state
     clear_state(user_id)
     
     if success:
@@ -577,11 +519,9 @@ def process_points(message: Message, bot):
         )
 
 def process_contact(message: Message, bot):
-    """Process contact input for online answer"""
     user_id = message.from_user.id
     contact = message.text.strip()
     
-    # Get question ID from state
     state_data = get_state(user_id)
     question_id = int(state_data.split(':', 1)[1]) if ':' in state_data else 0
     
@@ -595,16 +535,12 @@ def process_contact(message: Message, bot):
         )
         return
     
-    # Save online answer
     save_online_answer(question_id, user_id, contact)
     
-    # Get question details
     question = get_question_details(question_id)
     
-    # Clear state
     clear_state(user_id)
     
-    # Notify user
     bot.send_message(
         user_id,
         f"{EMOJI['success']} <b>Ваш контакт отправлен автору вопроса!</b>",
@@ -612,7 +548,6 @@ def process_contact(message: Message, bot):
         parse_mode='HTML'
     )
     
-    # Notify question author
     if question and question['author_id'] != user_id:
         bot.send_message(
             question['author_id'],
@@ -623,11 +558,9 @@ def process_contact(message: Message, bot):
         )
 
 def process_meeting_time(message: Message, bot):
-    """Process meeting time input for offline answer"""
     user_id = message.from_user.id
     meeting_time = message.text.strip()
     
-    # Get question ID from state
     state_data = get_state(user_id)
     question_id = int(state_data.split(':', 1)[1]) if ':' in state_data else 0
     
@@ -641,16 +574,12 @@ def process_meeting_time(message: Message, bot):
         )
         return
     
-    # Save offline answer
     save_offline_answer(question_id, user_id, meeting_time)
     
-    # Get question details
     question = get_question_details(question_id)
     
-    # Clear state
     clear_state(user_id)
     
-    # Notify user
     bot.send_message(
         user_id,
         f"{EMOJI['success']} <b>Информация о встрече отправлена автору вопроса!</b>",
@@ -658,7 +587,6 @@ def process_meeting_time(message: Message, bot):
         parse_mode='HTML'
     )
     
-    # Notify question author
     if question and question['author_id'] != user_id:
         bot.send_message(
             question['author_id'],
@@ -669,11 +597,9 @@ def process_meeting_time(message: Message, bot):
         )
 
 def process_add_contact(message: Message, bot):
-    """Process add contact input"""
     user_id = message.from_user.id
     contact = message.text.strip()
     
-    # Check if user is admin
     if not is_admin(user_id):
         bot.send_message(
             user_id,
@@ -683,10 +609,8 @@ def process_add_contact(message: Message, bot):
         clear_state(user_id)
         return
     
-    # Add contact
     success = add_contact(contact)
     
-    # Clear state
     clear_state(user_id)
     
     if success:
@@ -705,11 +629,9 @@ def process_add_contact(message: Message, bot):
         )
 
 def process_remove_contact(message: Message, bot):
-    """Process remove contact input"""
     user_id = message.from_user.id
     contact = message.text.strip()
     
-    # Check if user is admin
     if not is_admin(user_id):
         bot.send_message(
             user_id,
@@ -719,10 +641,8 @@ def process_remove_contact(message: Message, bot):
         clear_state(user_id)
         return
     
-    # Remove contact
     success = remove_contact(contact)
     
-    # Clear state
     clear_state(user_id)
     
     if success:
@@ -740,25 +660,19 @@ def process_remove_contact(message: Message, bot):
             parse_mode='HTML'
         )
 
-# Callback handlers
 def process_question_selection(call: CallbackQuery, bot):
-    """Process question selection from list"""
     user_id = call.from_user.id
     
-    # Extract question ID from callback data
     question_id = int(call.data.split('_')[1])
     
-    # Get question details
     question = get_question_details(question_id)
     
     if not question:
         bot.answer_callback_query(call.id, "Вопрос не найден")
         return
     
-    # Format question details
     text = UI.format_question(question, with_author=True)
     
-    # Send question details with answer options if question is open
     if question['status'] == 'open':
         bot.send_message(
             user_id,
@@ -773,17 +687,13 @@ def process_question_selection(call: CallbackQuery, bot):
             parse_mode='HTML'
         )
     
-    # Answer callback query
     bot.answer_callback_query(call.id)
 
 def process_online_answer(call: CallbackQuery, bot):
-    """Process online answer selection"""
     user_id = call.from_user.id
     
-    # Extract question ID from callback data
     question_id = int(call.data.split('_')[2])
     
-    # Set state to waiting for contact
     save_state(user_id, f"{STATE_WAITING_CONTACT}:{question_id}")
     
     bot.send_message(
@@ -794,17 +704,13 @@ def process_online_answer(call: CallbackQuery, bot):
         parse_mode='HTML'
     )
     
-    # Answer callback query
     bot.answer_callback_query(call.id)
 
 def process_offline_answer(call: CallbackQuery, bot):
-    """Process offline answer selection"""
     user_id = call.from_user.id
     
-    # Extract question ID from callback data
     question_id = int(call.data.split('_')[2])
     
-    # Set state to waiting for meeting time
     save_state(user_id, f"{STATE_WAITING_MEETING_TIME}:{question_id}")
     
     bot.send_message(
@@ -815,15 +721,11 @@ def process_offline_answer(call: CallbackQuery, bot):
         parse_mode='HTML'
     )
     
-    # Answer callback query
     bot.answer_callback_query(call.id)
 
-# Utility handlers
 def cancel_action(message: Message, bot):
-    """Cancel current action and clear state"""
     user_id = message.from_user.id
     
-    # Clear state
     clear_state(user_id)
     
     bot.send_message(
