@@ -1,76 +1,68 @@
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
-# Database paths
 DB_PATH = os.getenv("USER_DB_PATH", "school_bot.db")
 CLASS_DB_PATH = os.getenv("CLASS_DB_PATH", "classes.db")
 
-# Admin configuration
 ADMIN_IDS = []
 admin_ids_str = os.getenv("ADMIN_ID", "1968139479")
 try:
-    # Handle comma-separated list of admin IDs
     for admin_id in admin_ids_str.replace(" ", "").split(","):
         if admin_id:
             ADMIN_IDS.append(int(admin_id))
     
-    # Ensure we have at least one admin ID
     if not ADMIN_IDS:
-        ADMIN_IDS = [5952409238, 5498111784]  # Default admin IDs
+        ADMIN_IDS = [5952409238, 5498111784]
 except Exception:
-    ADMIN_IDS = [5952409238, 5498111784]  # Default admin IDs
+    ADMIN_IDS = [5952409238, 5498111784]
 
-# Authorized contacts for adding scores
 AUTHORIZED_CONTACTS = []
 authorized_contacts_str = os.getenv("AUTHORIZED_CONTACTS", "")
 if authorized_contacts_str:
     AUTHORIZED_CONTACTS = [contact.strip() for contact in authorized_contacts_str.split(",")]
 
-# Modern emoji set for UI
 EMOJI = {
-    'welcome': '🚀',           # More tech-focused welcome
+    'welcome': '🚀',
     'question': '❓',
-    'open': '📱',              # More modern icon for open questions
-    'help': '🔍',              # Search icon for help
+    'open': '📱',
+    'help': '🔍',
     'rating': '📊',
-    'cancel': '✖️',            # Bolder cancel
+    'cancel': '✖️',
     'success': '✅',
     'warning': '⚠️',
     'error': '❌',
     'add': '➕',
-    'check': '🔄',             # Refresh icon for checking
-    'pin': '📍',               # Modern pin
+    'check': '🔄',
+    'pin': '📍',
     'description': '📝',
     'author': '👤',
-    'time': '⏱️',              # Modern timer
-    'status': '🔵',            # Status dot
-    'open_status': '🟢',       # Green for open
-    'closed_status': '🔴',     # Red for closed
-    'online': '💬',            # Chat bubble for online
-    'offline': '🤝',           # Handshake for meeting
-    'mail': '📨',              # Modern mail
+    'time': '⏱️',
+    'status': '🔵',
+    'open_status': '🟢',
+    'closed_status': '🔴',
+    'online': '💬',
+    'offline': '🤝',
+    'mail': '📨',
     'target': '🎯',
     'trophy': '🏆',
-    'empty': '🔍',             # Search for empty
+    'empty': '🔍',
     'calendar': '📅',
     'info': 'ℹ️',
     'sos': '🆘',
     'open_questions': '📱',
-    'admin': '⚙️',             # Gear for admin
-    'contact': '👥',           # Contact icon
-    'authorized': '🔐',        # Lock for authorized
-    'unauthorized': '🔒',      # Locked for unauthorized
-    'class': '🏫',             # School for class
-    'points': '💯',            # Points
-    'refresh': '🔄',           # Refresh
-    'settings': '⚙️',          # Settings
-    'back': '◀️',              # Back button
+    'admin': '⚙️',
+    'contact': '👥',
+    'authorized': '🔐',
+    'unauthorized': '🔒',
+    'class': '🏫',
+    'points': '💯',
+    'refresh': '🔄',
+    'settings': '⚙️',
+    'back': '◀️',
 }
 
-# UI Text constants
 TEXT = {
     'welcome': f"{EMOJI['welcome']} <b>Добро пожаловать в AcadeMix</b> {EMOJI['welcome']}",
     'admin_welcome': f"{EMOJI['admin']} <b>Панель администратора AcadeMix</b> {EMOJI['settings']}",
