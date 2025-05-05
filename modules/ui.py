@@ -6,6 +6,7 @@ from modules.config import EMOJI, TEXT
 class UI:
     @staticmethod
     def main_menu():
+        # Создание главного меню с кнопками для пользователя
         kb = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
         kb.add(
             types.KeyboardButton(f'{EMOJI["question"]} Задать вопрос'),
@@ -19,6 +20,7 @@ class UI:
 
     @staticmethod
     def admin_menu():
+        # Создание меню администратора с дополнительными функциями
         kb = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
         kb.add(
             types.KeyboardButton(f'{EMOJI["add"]} Добавить баллы'),
@@ -35,6 +37,7 @@ class UI:
 
     @staticmethod
     def contact_management_menu():
+        # Создание меню для управления контактами
         kb = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
         kb.add(
             types.KeyboardButton(f'{EMOJI["add"]} Добавить контакт'),
@@ -48,18 +51,21 @@ class UI:
 
     @staticmethod
     def cancel_button():
+        # Кнопка отмены текущего действия
         kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
         kb.add(types.KeyboardButton(f"{EMOJI['cancel']} Отмена"))
         return kb
 
     @staticmethod
     def back_button():
+        # Кнопка возврата назад
         kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
         kb.add(types.KeyboardButton(f"{EMOJI['back']} Назад"))
         return kb
 
     @staticmethod
     def answer_type_buttons(qid: int):
+        # Кнопки выбора типа ответа на вопрос
         kb = types.InlineKeyboardMarkup(row_width=1)
         kb.add(
             types.InlineKeyboardButton(
@@ -75,10 +81,11 @@ class UI:
 
     @staticmethod
     def question_list(questions: List[Tuple]):
+        # Создание списка вопросов с кнопками
         kb = types.InlineKeyboardMarkup(row_width=1)
         for q in questions:
             text = q[1]
-            if len(text) > 40:  # Shorter for modern UI
+            if len(text) > 40:
                 text = text[:37] + '...'
             kb.add(types.InlineKeyboardButton(
                 f"{EMOJI['pin']} {text}", 
@@ -88,6 +95,7 @@ class UI:
 
     @staticmethod
     def help_button():
+        # Кнопка перехода к помощнику
         kb = types.InlineKeyboardMarkup()
         kb.add(types.InlineKeyboardButton(
             f"{EMOJI['sos']} Перейти к помощнику", 
@@ -97,6 +105,7 @@ class UI:
 
     @staticmethod
     def format_welcome_message() -> str:
+        # Форматирование приветственного сообщения
         return f"""
 {TEXT['welcome']}
 
@@ -110,12 +119,13 @@ class UI:
 
     @staticmethod
     def format_admin_welcome() -> str:
+        # Форматирование приветствия для администратора
         return f"""
 {TEXT['admin_welcome']}
 
 <b>Доступные функции:</b>
 • {EMOJI['add']} Добавление баллов классам
-• {EMOJI['contact']} Управление авт��ризованными контактами
+• {EMOJI['contact']} Управление авторизованными контактами
 • {EMOJI['rating']} Просмотр рейтинга классов
 • {EMOJI['check']} Проверка состояния базы данных
 
@@ -124,6 +134,7 @@ class UI:
 
     @staticmethod
     def format_help_message() -> str:
+        # Форматирование справочного сообщения
         return f"""
 {TEXT['help_title']}
 
@@ -139,6 +150,7 @@ class UI:
 
     @staticmethod
     def format_class_rating(scores: List[Tuple]) -> str:
+        # Форматирование рейтинга классов с медалями
         if not scores:
             return TEXT['empty_rating']
             
@@ -156,6 +168,7 @@ class UI:
 
     @staticmethod
     def format_question(question: Dict[str, Any], with_author: bool = False) -> str:
+        # Форматирование информации о вопросе
         text = f"<b>{question['title']}</b>\n\n"
         
         if question['description'] and question['description'] != 'Нет описания':
@@ -172,6 +185,7 @@ class UI:
 
     @staticmethod
     def format_authorized_contacts(contacts: List[str]) -> str:
+        # Форматирование списка авторизованных контактов
         if not contacts:
             return f"{EMOJI['empty']} <b>Список авторизованных контактов пуст</b>"
             

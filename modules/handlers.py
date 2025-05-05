@@ -16,6 +16,7 @@ from modules.permissions import (
 from modules.ui import UI
 from modules.config import TEXT, EMOJI
 
+# Константы для состояний пользователя
 STATE_WAITING_TITLE = "waiting_title"
 STATE_WAITING_DESCRIPTION = "waiting_description"
 STATE_WAITING_POINTS = "waiting_points"
@@ -25,16 +26,19 @@ STATE_WAITING_ADD_CONTACT = "waiting_add_contact"
 STATE_WAITING_REMOVE_CONTACT = "waiting_remove_contact"
 
 def register_all_handlers():
+    # Регистрация всех обработчиков сообщений
     register_command_handlers()
     register_message_handlers()
     register_callback_handlers()
 
 def register_command_handlers():
+    # Регистрация обработчиков команд
     bot.register_message_handler(cmd_start, commands=['start'], pass_bot=True)
     bot.register_message_handler(cmd_help, commands=['help'], pass_bot=True)
     bot.register_message_handler(cmd_admin, commands=['admin'], pass_bot=True)
 
 def register_message_handlers():
+    # Регистрация обработчиков текстовых сообщений
     bot.register_message_handler(
         ask_question, 
         func=lambda msg: msg.text and f'{EMOJI["question"]} Задать вопрос' in msg.text,
@@ -104,6 +108,7 @@ def register_message_handlers():
         pass_bot=True
     )
     
+    # Регистрация обработчиков для разных состояний пользователя
     bot.register_message_handler(
         process_question_title, 
         func=lambda msg: get_state(msg.from_user.id) == STATE_WAITING_TITLE,
@@ -141,6 +146,7 @@ def register_message_handlers():
     )
 
 def register_callback_handlers():
+    # Регистрация обработчиков для кнопок
     bot.register_callback_query_handler(
         process_question_selection, 
         func=lambda call: call.data and call.data.startswith('question_'),
@@ -158,6 +164,7 @@ def register_callback_handlers():
     )
 
 def cmd_start(message: Message, bot):
+    # Обработка команды /start - начало работы с ботом
     user_id = message.from_user.id
     username = message.from_user.username
     
@@ -173,6 +180,7 @@ def cmd_start(message: Message, bot):
     )
 
 def cmd_help(message: Message, bot):
+    # Отправка справочной информации
     bot.send_message(
         message.chat.id,
         UI.format_help_message(),
@@ -181,6 +189,7 @@ def cmd_help(message: Message, bot):
     )
 
 def cmd_admin(message: Message, bot):
+    # Вход в панель администратора
     user_id = message.from_user.id
     
     if is_admin(user_id):
@@ -199,6 +208,7 @@ def cmd_admin(message: Message, bot):
         )
 
 def ask_question(message: Message, bot):
+    # Начало процесса создания вопроса
     user_id = message.from_user.id
     
     save_state(user_id, STATE_WAITING_TITLE)
@@ -211,6 +221,7 @@ def ask_question(message: Message, bot):
     )
 
 def show_open_questions(message: Message, bot):
+    # Отображение списка открытых вопросов
     questions = get_open_questions()
     
     if not questions:
@@ -229,6 +240,7 @@ def show_open_questions(message: Message, bot):
     )
 
 def show_rating(message: Message, bot):
+    # Отображение рейтинга классов
     global class_db
     from modules.database import init_databases, class_db
     
@@ -259,6 +271,7 @@ def show_rating(message: Message, bot):
     )
 
 def add_points(message: Message, bot):
+    # Начало процесса добавления баллов классу
     user_id = message.from_user.id
     username = message.from_user.username
     
@@ -280,6 +293,7 @@ def add_points(message: Message, bot):
     )
 
 def manage_contacts(message: Message, bot):
+    # Вход в меню управления контактами
     user_id = message.from_user.id
     
     if not is_admin(user_id):
@@ -298,6 +312,7 @@ def manage_contacts(message: Message, bot):
     )
 
 def check_db(message: Message, bot):
+    # Проверка состояния базы данных
     user_id = message.from_user.id
     
     if not is_admin(user_id):
@@ -325,9 +340,11 @@ def check_db(message: Message, bot):
         )
 
 def back_to_main(message: Message, bot):
+    # Возврат в главное меню
     cmd_start(message, bot)
 
 def add_authorized_contact(message: Message, bot):
+    # Начало процесса добавления авторизованного контакта
     user_id = message.from_user.id
     
     if not is_admin(user_id):
@@ -349,6 +366,7 @@ def add_authorized_contact(message: Message, bot):
     )
 
 def remove_authorized_contact(message: Message, bot):
+    # Начало процесса удаления авторизованного контакта
     user_id = message.from_user.id
     
     if not is_admin(user_id):
@@ -363,13 +381,14 @@ def remove_authorized_contact(message: Message, bot):
     
     bot.send_message(
         user_id,
-        f"{EMOJI['cancel']} <b>Удаление авторизованного контакта</b>\n\n"
+        f"{EMOJI['cancel']} <b>Удаление автори��ованного контакта</b>\n\n"
         f"Введите имя пользователя (с @ или без):",
         reply_markup=UI.cancel_button(),
         parse_mode='HTML'
     )
 
 def list_authorized_contacts(message: Message, bot):
+    # Отображение списка авторизованных контактов
     user_id = message.from_user.id
     
     if not is_admin(user_id):
@@ -389,9 +408,11 @@ def list_authorized_contacts(message: Message, bot):
     )
 
 def back_to_admin(message: Message, bot):
+    # Возврат в меню администратора
     cmd_admin(message, bot)
 
 def process_question_title(message: Message, bot):
+    # Обработка заголовка вопроса
     user_id = message.from_user.id
     title = message.text.strip()
     
@@ -414,6 +435,7 @@ def process_question_title(message: Message, bot):
     )
 
 def process_question_description(message: Message, bot):
+    # Обработка описания вопроса и сохранение вопроса
     user_id = message.from_user.id
     description = message.text.strip()
     
@@ -448,6 +470,7 @@ def process_question_description(message: Message, bot):
     )
 
 def process_points(message: Message, bot):
+    # Обработка добавления баллов классу
     user_id = message.from_user.id
     username = message.from_user.username
     text = message.text.strip()
@@ -519,6 +542,7 @@ def process_points(message: Message, bot):
         )
 
 def process_contact(message: Message, bot):
+    # Обработка контактной информации для онлайн-ответа
     user_id = message.from_user.id
     contact = message.text.strip()
     
@@ -558,6 +582,7 @@ def process_contact(message: Message, bot):
         )
 
 def process_meeting_time(message: Message, bot):
+    # Обработка информации о встрече для офлайн-ответа
     user_id = message.from_user.id
     meeting_time = message.text.strip()
     
@@ -597,6 +622,7 @@ def process_meeting_time(message: Message, bot):
         )
 
 def process_add_contact(message: Message, bot):
+    # Обработка добавления авторизованного контакта
     user_id = message.from_user.id
     contact = message.text.strip()
     
@@ -629,6 +655,7 @@ def process_add_contact(message: Message, bot):
         )
 
 def process_remove_contact(message: Message, bot):
+    # Обработка удаления авторизованного контакта
     user_id = message.from_user.id
     contact = message.text.strip()
     
@@ -661,6 +688,7 @@ def process_remove_contact(message: Message, bot):
         )
 
 def process_question_selection(call: CallbackQuery, bot):
+    # Обработка выбора вопроса из списка
     user_id = call.from_user.id
     
     question_id = int(call.data.split('_')[1])
@@ -690,6 +718,7 @@ def process_question_selection(call: CallbackQuery, bot):
     bot.answer_callback_query(call.id)
 
 def process_online_answer(call: CallbackQuery, bot):
+    # Начало процесса ответа онлайн
     user_id = call.from_user.id
     
     question_id = int(call.data.split('_')[2])
@@ -707,6 +736,7 @@ def process_online_answer(call: CallbackQuery, bot):
     bot.answer_callback_query(call.id)
 
 def process_offline_answer(call: CallbackQuery, bot):
+    # Начало процесса ответа офлайн
     user_id = call.from_user.id
     
     question_id = int(call.data.split('_')[2])
@@ -724,6 +754,7 @@ def process_offline_answer(call: CallbackQuery, bot):
     bot.answer_callback_query(call.id)
 
 def cancel_action(message: Message, bot):
+    # Отмена текущего действия
     user_id = message.from_user.id
     
     clear_state(user_id)

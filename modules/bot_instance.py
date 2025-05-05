@@ -2,10 +2,14 @@ import os
 import telebot
 from dotenv import load_dotenv
 
+# Загрузка переменных окружения из файла .env
 load_dotenv()
 
+# Получение токена бота из переменных окружения
 token = os.getenv("BOT_TOKEN")
 if not token:
-    token = "7897665316:AAGQZ6huwcfV2_C9B3AlrB7BD9r7A33uNxU"
+    # Если токен не найден, используем резервный токен
+    token = "8037468732:AAFCEbY9NBt0exuF7NSbZqn9-amf4h2Sn8I"
 
+# Создание экземпляра бота с указанным токеном и HTML-форматированием сообщений
 bot = telebot.TeleBot(token, parse_mode="HTML")
