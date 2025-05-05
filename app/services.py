@@ -3,12 +3,14 @@ import sqlite3
 import aiosqlite
 from datetime import datetime
 from typing import List, Tuple, Dict, Any, Optional
-from config import DB_PATH, CLASS_DB_PATH, ADMIN_IDS
+from app.config import DB_PATH, CLASS_DB_PATH, ADMIN_IDS
+
 
 class DatabaseManager:
     def __init__(self, path: str):
         self.path = path
         self._create_tables_sync()
+
     def _create_tables_sync(self):
         # Синхронно создаёт все необходимые таблицы при инициализации
         conn = sqlite3.connect(self.path)
@@ -21,6 +23,7 @@ class DatabaseManager:
                 registration_date TEXT
             )
         ''')
+
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS questions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,6 +34,7 @@ class DatabaseManager:
                 created_at TEXT
             )
         ''')
+
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS answers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,16 +48,19 @@ class DatabaseManager:
         ''')
         conn.commit()
         conn.close()
+
     async def execute(self, query: str, params: tuple = ()):
         # Асинхронно выполняет запрос без возврата результата
         async with aiosqlite.connect(self.path) as db:
             await db.execute(query, params)
             await db.commit()
+
     async def fetchone(self, query: str, params: tuple = ()):
         # Асинхронно возвращает одну строку результата запроса
         async with aiosqlite.connect(self.path) as db:
             cursor = await db.execute(query, params)
             return await cursor.fetchone()
+        
     async def fetchall(self, query: str, params: tuple = ()):
         # Асинхронно возвращает все строки результата запроса
         async with aiosqlite.connect(self.path) as db:
@@ -76,8 +83,6 @@ async def init_classes_db():
         ''')
         await db_conn.commit()
 
-def is_admin(user_id):
-    return user_id in ADMIN_IDS
 
 class ClassRatingService:
     @staticmethod
@@ -88,6 +93,7 @@ class ClassRatingService:
             cursor = await conn.execute("SELECT class_name, total_score FROM class_scores ORDER BY total_score DESC")
             rows = await cursor.fetchall()
             return rows
+        
     @staticmethod
     async def save_online_answer(qid: int, uid: int, contact: str):
         await db.execute(
@@ -96,6 +102,7 @@ class ClassRatingService:
         )
         # После ответа вопрос автоматически закрывается
         await db.execute('UPDATE questions SET status = ? WHERE id = ?', ('closed', qid))
+        
     @staticmethod
     async def save_offline_answer(qid: int, uid: int, mt: str):
         await db.execute(
@@ -104,18 +111,22 @@ class ClassRatingService:
         )
         # После ответа вопрос автоматически закрывается
         await db.execute('UPDATE questions SET status = ? WHERE id = ?', ('closed', qid))
+
     @staticmethod
     async def register_user(uid: int, uname: str):
         reg = datetime.now().strftime('%Y-%m-%d %H:%M')
         # Добавляет пользователя только если его ещё нет (INSERT OR IGNORE)
         await db.execute('INSERT OR IGNORE INTO users(user_id, username, registration_date) VALUES(?,?,?)', (uid, uname, reg))
+        
     @staticmethod
     async def save_question(uid: int, title: str, desc: str):
         await db.execute('INSERT INTO questions(author_id, title, description, status, created_at) VALUES(?,?,?,?,?)',
                    (uid, title, desc, 'open', datetime.now().strftime('%Y-%m-%d %H:%M')))
+        
     @staticmethod
     async def get_open():
         return await db.fetchall('SELECT q.id, q.title FROM questions q WHERE q.status = ?', ('open',))
+    
     @staticmethod
     async def get_question(qid: int) -> Optional[Dict[str, Any]]:
         row = await db.fetchone(
@@ -128,6 +139,7 @@ class ClassRatingService:
             'id': row[0], 'title': row[1], 'description': row[2],
             'status': row[3], 'created_at': row[4], 'author': row[5] or 'Аноним'
         }
+    
     @staticmethod
     async def add_class_score(class_name: str, score: int) -> bool:
         async with aiosqlite.connect(CLASS_DB_PATH) as conn:

@@ -1,6 +1,14 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
+# Aiogram imports
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, \
+                          InlineKeyboardMarkup, InlineKeyboardButton
+
+# Project imports
+from .text import EMOJI
+from app.config import Settings
+
+# Other imports
 from typing import List, Tuple, Dict
-from config import EMOJI
+
 
 class UI:
     @staticmethod
@@ -18,6 +26,7 @@ class UI:
             ],
             resize_keyboard=True
         )
+    
     @staticmethod
     def admin_menu():
         return ReplyKeyboardMarkup(
@@ -32,6 +41,7 @@ class UI:
             ],
             resize_keyboard=True
         )
+    
     @staticmethod
     def cancel_button():
         return ReplyKeyboardMarkup(
@@ -40,6 +50,7 @@ class UI:
             ],
             resize_keyboard=True
         )
+    
     @staticmethod
     def answer_type_buttons(qid: int):
         return InlineKeyboardMarkup(
@@ -48,25 +59,28 @@ class UI:
                 [InlineKeyboardButton(text=f"{EMOJI['offline']} Встреча", callback_data=f"answer_offline_{qid}")]
             ]
         )
+    
     @staticmethod
     def question_list(questions: List[Tuple]):
         inline_keyboard = []
         for q in questions:
             text = q[1]
-            # Обрезаем длинные заголовки вопросов до 50 символов для компактности
-            if len(text) > 50:
-                text = text[:47] + '...'
+            # Обрезаем длинные заголовки вопросов до compact_string_length=50 символов для компактности
+            if len(text) > Settings.compact_string_length:
+                text = text[:Settings.compact_string_length-3] + '...'
             inline_keyboard.append(
                 [InlineKeyboardButton(text=f"{EMOJI['pin']} {text}", callback_data=f"question_{q[0]}")]
             )
         return InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
+    
     @staticmethod
     def help_button():
         return InlineKeyboardMarkup(
             inline_keyboard=[
-                [InlineKeyboardButton(text="Перейти к помощнику", url="https://t.me/AcadeMix_Support_bot")]
+                [InlineKeyboardButton(text="Перейти к помощнику", url=Settings.helper_bot_url)]
             ]
         )
+    
     @staticmethod
     def format_class_rating(scores: List[Tuple]) -> str:
         text = f"{EMOJI['trophy']} <b>Рейтинг классов:</b>\n\n"
@@ -79,6 +93,7 @@ class UI:
                 prefix = f"{idx}. "
             text += f"{prefix}<b>{cls}</b>: {score} баллов\n"
         return text
+    
     @staticmethod
     def format_question(question: Dict, with_author: bool = False) -> str:
         text = f"<b>{question['title']}</b>\n\n"
