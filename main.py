@@ -12,14 +12,11 @@ from modules.handlers import register_all_handlers
 load_dotenv()
 
 def main():
-    # Инициализация баз данных
     init_databases()
     
-    # Регистрация всех обработчиков сообщений
     register_all_handlers()
     
     print("Bot started successfully!")
-    # Запуск бесконечного опроса сервера Telegram
     bot.infinity_polling(timeout=10, long_polling_timeout=5)
 
 if __name__ == "__main__":
