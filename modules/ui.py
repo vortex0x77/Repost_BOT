@@ -73,7 +73,7 @@ class UI:
                 callback_data=f"answer_online_{qid}"
             ),
             types.InlineKeyboardButton(
-                f"{EMOJI['offline']} Личная встреча", 
+                f"{EMOJI['offline']} Личная встреча(в школе)", 
                 callback_data=f"answer_offline_{qid}"
             )
         )

@@ -1,5 +1,5 @@
 import sys
-sys.dont_write_bytecode = True  # Отключение создания .pyc файлов
+sys.dont_write_bytecode = True
 
 import os
 from dotenv import load_dotenv

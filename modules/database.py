@@ -190,7 +190,7 @@ def get_question_details(question_id: int) -> Optional[Dict[str, Any]]:
     # Получение детальной информации о вопросе
     question_data = user_db.fetchone('''
         SELECT q.id, q.author_id, q.title,
-               COALESCE(q.description, 'Не�� описания'),
+               COALESCE(q.description, 'Нет описания'),
                q.status, q.created_at,
                COALESCE(u.username, 'Аноним')
         FROM questions q

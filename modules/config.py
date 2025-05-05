@@ -28,7 +28,7 @@ except Exception:
 AUTHORIZED_CONTACTS = []
 authorized_contacts_str = os.getenv("AUTHORIZED_CONTACTS", "")
 if authorized_contacts_str:
-    # Преоб��азование строки контактов в список
+    # Преобразование строки контактов в список
     AUTHORIZED_CONTACTS = [contact.strip() for contact in authorized_contacts_str.split(",")]
 
 # Словарь эмодзи для использования в сообщениях

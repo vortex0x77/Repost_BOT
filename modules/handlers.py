@@ -754,7 +754,7 @@ def process_offline_answer(call: CallbackQuery, bot):
     bot.answer_callback_query(call.id)
 
 def cancel_action(message: Message, bot):
-    # Отмена текущего действия
+    # Отмена действия
     user_id = message.from_user.id
     
     clear_state(user_id)

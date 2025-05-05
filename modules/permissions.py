@@ -26,7 +26,7 @@ def add_contact(contact: str) -> bool:
     return add_authorized_contact(clean_contact)
 
 def remove_contact(contact: str) -> bool:
-    # Удаление контакта из списка авторизованных
+    # Удаление контакта из списка
     clean_contact = contact.lstrip('@')
     from modules.database import remove_authorized_contact
     return remove_authorized_contact(clean_contact)
