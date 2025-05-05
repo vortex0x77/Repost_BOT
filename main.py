@@ -1,23 +1,18 @@
-import sys
-sys.dont_write_bytecode = True
+import asyncio
+from aiogram import Bot, Dispatcher
+from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.client.default import DefaultBotProperties
 
-import os
-from dotenv import load_dotenv
+from config import BOT_TOKEN
+from handlers import router
+from services import init_classes_db
 
-from modules.bot_instance import bot
-from modules.database import init_databases
-from modules.handlers import register_all_handlers
-
-# Загрузка переменных окружения из .env файла
-load_dotenv()
-
-def main():
-    init_databases()
-    
-    register_all_handlers()
-    
-    print("Bot started successfully!")
-    bot.infinity_polling(timeout=10, long_polling_timeout=5)
+async def main():
+    bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
+    dp = Dispatcher(storage=MemoryStorage())
+    dp.include_router(router)
+    await init_classes_db()
+    await dp.start_polling(bot)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
