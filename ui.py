@@ -53,6 +53,7 @@ class UI:
         inline_keyboard = []
         for q in questions:
             text = q[1]
+            # Обрезаем длинные заголовки вопросов до 50 символов для компактности кнопок
             if len(text) > 50:
                 text = text[:47] + '...'
             inline_keyboard.append(
@@ -71,6 +72,7 @@ class UI:
         text = f"{EMOJI['trophy']} <b>Рейтинг классов:</b>\n\n"
         medals = ["🥇", "🥈", "🥉"]
         for idx, (cls, score) in enumerate(scores, 1):
+            # Первым трём классам присваиваются медали, остальным — номер
             if idx <= 3 and idx <= len(medals):
                 prefix = f"{medals[idx-1]} "
             else:
@@ -83,6 +85,7 @@ class UI:
         if question['description']:
             text += f"{question['description']}\n\n"
         text += f"{EMOJI['status']} Статус: "
+        # Показываем статус вопроса с соответствующим эмодзи
         text += f"{EMOJI['open_status']} Открыт" if question['status'] == 'open' else f"{EMOJI['closed_status']} Закрыт"
         text += f"\n{EMOJI['time']} Создан: {question['created_at']}"
         if with_author:

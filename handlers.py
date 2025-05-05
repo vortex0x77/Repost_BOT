@@ -38,6 +38,7 @@ async def admin_add(message: Message, state: FSMContext):
         return
     await message.answer("📝 Введите в формате: <code>Класс Баллы</code>\nПример: 10A 50", 
                         parse_mode="HTML", reply_markup=UI.cancel_button())
+    # Переводим FSM в режим ожидания ввода баллов (используем состояние для повторного использования шага)
     await state.set_state(AnswerStates.waiting_for_meeting_time)
 
 @router.message(F.text == f"{EMOJI['check']} Проверить БД")
@@ -105,6 +106,7 @@ async def start_question(message: Message, state: FSMContext):
         f"{EMOJI['pin']} Введите краткий заголовок вопроса (до 100 символов):",
         reply_markup=UI.cancel_button()
     )
+    # FSM: переводим в состояние ожидания заголовка вопроса
     await state.set_state(QuestionStates.waiting_for_title)
 
 @router.message(QuestionStates.waiting_for_title)
@@ -123,6 +125,7 @@ async def process_question_title(message: Message, state: FSMContext):
     await message.answer(
         f"{EMOJI['description']} Введите подробное описание вопроса (или отправьте '-' чтобы пропустить):"
     )
+    # FSM: переводим в состояние ожидания описания вопроса
     await state.set_state(QuestionStates.waiting_for_description)
 
 @router.message(QuestionStates.waiting_for_description)
@@ -163,6 +166,7 @@ async def show_open_questions(message: Message):
 
 @router.callback_query(F.data.startswith("question_"))
 async def show_question_details(callback: CallbackQuery, state: FSMContext):
+    # Получаем id вопроса из callback_data (например, "question_5" → 5)
     qid = int(callback.data.split("_")[1])
     question = await ClassRatingService.get_question(qid)
     if not question:
@@ -176,22 +180,26 @@ async def show_question_details(callback: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data.startswith("answer_online_"))
 async def answer_online(callback: CallbackQuery, state: FSMContext):
+    # Получаем id вопроса из callback_data (например, "answer_online_7" → 7)
     qid = int(callback.data.split("_")[-1])
     await state.update_data(qid=qid)
     await callback.message.answer(
         f"{EMOJI['mail']} Введите ваш Telegram-контакт (например, @username):",
         reply_markup=UI.cancel_button()
     )
+    # FSM: переводим в состояние ожидания контакта
     await state.set_state(AnswerStates.waiting_for_contact)
 
 @router.callback_query(F.data.startswith("answer_offline_"))
 async def answer_offline(callback: CallbackQuery, state: FSMContext):
+    # Получаем id вопроса из callback_data (например, "answer_offline_7" → 7)
     qid = int(callback.data.split("_")[-1])
     await state.update_data(qid=qid)
     await callback.message.answer(
         f"{EMOJI['calendar']} Введите дату и время встречи (например, 12.05 15:00):",
         reply_markup=UI.cancel_button()
     )
+    # FSM: переводим в состояние ожидания времени встречи
     await state.set_state(AnswerStates.waiting_for_meeting_time)
 
 @router.message(AnswerStates.waiting_for_contact)

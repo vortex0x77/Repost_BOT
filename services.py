@@ -10,6 +10,7 @@ class DatabaseManager:
         self.path = path
         self._create_tables_sync()
     def _create_tables_sync(self):
+        # Синхронно создаёт все необходимые таблицы при инициализации (используется только при запуске)
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
         cursor.execute('''
@@ -44,14 +45,17 @@ class DatabaseManager:
         conn.commit()
         conn.close()
     async def execute(self, query: str, params: tuple = ()):
+        # Асинхронно выполняет запрос без возврата результата
         async with aiosqlite.connect(self.path) as db:
             await db.execute(query, params)
             await db.commit()
     async def fetchone(self, query: str, params: tuple = ()):
+        # Асинхронно возвращает одну строку результата запроса
         async with aiosqlite.connect(self.path) as db:
             cursor = await db.execute(query, params)
             return await cursor.fetchone()
     async def fetchall(self, query: str, params: tuple = ()):
+        # Асинхронно возвращает все строки результата запроса
         async with aiosqlite.connect(self.path) as db:
             cursor = await db.execute(query, params)
             return await cursor.fetchall()
@@ -60,6 +64,7 @@ db = DatabaseManager(DB_PATH)
 
 async def init_classes_db():
     dir_path = os.path.dirname(CLASS_DB_PATH)
+    # Создаёт директорию для базы классов, если её нет (важно для работы на сервере)
     if dir_path and not os.path.exists(dir_path):
         os.makedirs(dir_path, exist_ok=True)
     async with aiosqlite.connect(CLASS_DB_PATH) as db_conn:
@@ -89,6 +94,7 @@ class ClassRatingService:
             'INSERT INTO answers(question_id, responder_id, answer_type, contact_info, created_at) VALUES(?,?,?,?,?)',
             (qid, uid, 'online', contact, datetime.now().strftime('%Y-%m-%d %H:%M'))
         )
+        # После ответа вопрос автоматически закрывается
         await db.execute('UPDATE questions SET status = ? WHERE id = ?', ('closed', qid))
     @staticmethod
     async def save_offline_answer(qid: int, uid: int, mt: str):
@@ -96,10 +102,12 @@ class ClassRatingService:
             'INSERT INTO answers(question_id, responder_id, answer_type, meeting_time, created_at) VALUES(?,?,?,?,?)',
             (qid, uid, 'offline', mt, datetime.now().strftime('%Y-%m-%d %H:%M'))
         )
+        # После ответа вопрос автоматически закрывается
         await db.execute('UPDATE questions SET status = ? WHERE id = ?', ('closed', qid))
     @staticmethod
     async def register_user(uid: int, uname: str):
         reg = datetime.now().strftime('%Y-%m-%d %H:%M')
+        # Добавляет пользователя только если его ещё нет (INSERT OR IGNORE)
         await db.execute('INSERT OR IGNORE INTO users(user_id, username, registration_date) VALUES(?,?,?)', (uid, uname, reg))
     @staticmethod
     async def save_question(uid: int, title: str, desc: str):
@@ -129,12 +137,14 @@ class ClassRatingService:
             )
             result = await cursor.fetchone()
             if result:
+                # Если класс уже есть, увеличиваем его баллы
                 new_score = result[0] + score
                 await conn.execute(
                     "UPDATE class_scores SET total_score = ? WHERE class_name = ?",
                     (new_score, class_name)
                 )
             else:
+                # Если класса нет — создаём новую запись
                 await conn.execute(
                     "INSERT INTO class_scores (class_name, total_score) VALUES (?, ?)",
                     (class_name, score)
