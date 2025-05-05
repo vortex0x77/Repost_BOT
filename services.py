@@ -10,7 +10,7 @@ class DatabaseManager:
         self.path = path
         self._create_tables_sync()
     def _create_tables_sync(self):
-        # Синхронно создаёт все необходимые таблицы при инициализации (используется только при запуске)
+        # Синхронно создаёт все необходимые таблицы при инициализации
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
         cursor.execute('''

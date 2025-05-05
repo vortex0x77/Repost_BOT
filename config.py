@@ -9,7 +9,7 @@ ADMIN_IDS = [int(x) for x in os.getenv("ADMIN_ID", "1968139479,5952409238").repl
 DB_PATH = os.getenv("USER_DB_PATH", "school_bot.db")
 CLASS_DB_PATH = os.getenv("CLASS_DB_PATH", "classes.db")
 
-# Словарь с эмодзи для различных статусов и действий в боте
+# Словарь с эмодзи
 EMOJI = {
     'welcome': '🎉', 'question': '❓', 'open': '📚', 'help': '❔',
     'rating': '📊', 'cancel': '❌', 'success': '✅', 'warning': '⚠️', 'error': '🚫',

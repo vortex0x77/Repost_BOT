@@ -38,7 +38,7 @@ async def admin_add(message: Message, state: FSMContext):
         return
     await message.answer("📝 Введите в формате: <code>Класс Баллы</code>\nПример: 10A 50", 
                         parse_mode="HTML", reply_markup=UI.cancel_button())
-    # Переводим FSM в режим ожидания ввода баллов (используем состояние для повторного использования шага)
+    # Переводим FSM в режим ожидания ввода баллов
     await state.set_state(AnswerStates.waiting_for_meeting_time)
 
 @router.message(F.text == f"{EMOJI['check']} Проверить БД")

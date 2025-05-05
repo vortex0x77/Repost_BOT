@@ -53,7 +53,7 @@ class UI:
         inline_keyboard = []
         for q in questions:
             text = q[1]
-            # Обрезаем длинные заголовки вопросов до 50 символов для компактности кнопок
+            # Обрезаем длинные заголовки вопросов до 50 символов для компактности
             if len(text) > 50:
                 text = text[:47] + '...'
             inline_keyboard.append(

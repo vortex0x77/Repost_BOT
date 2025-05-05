@@ -1,5 +1,5 @@
 import sys
-sys.dont_write_bytecode = True  # Отключает создание .pyc файлов и папки __pycache__
+sys.dont_write_bytecode = True
 
 import asyncio
 from aiogram import Bot, Dispatcher
