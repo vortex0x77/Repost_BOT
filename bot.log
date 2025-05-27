@@ -1,6 +1,0 @@
-2025-05-27 22:25:58,845 - telethon.network.mtprotosender - INFO - Connecting to 149.154.167.51:443/TcpFull...
-2025-05-27 22:26:00,300 - telethon.network.mtprotosender - INFO - Connection to 149.154.167.51:443/TcpFull complete!
-2025-05-27 22:26:19,840 - __main__ - INFO - Бот успешно запущен
-2025-05-27 22:27:57,220 - __main__ - INFO - Запуск воркера для канала -1002685787359
-2025-05-27 22:29:58,244 - telethon.network.mtprotosender - INFO - Disconnecting from 149.154.167.51:443/TcpFull...
-2025-05-27 22:29:58,245 - telethon.network.mtprotosender - INFO - Disconnection from 149.154.167.51:443/TcpFull complete!
